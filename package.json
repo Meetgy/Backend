@@ -1,0 +1,21 @@
+{
+  "name": "p1_ws",
+  "type": "module",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": " nodemon ./src/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "mongodb": "^6.7.0",
+    "mongoose": "^8.4.1",
+    "validator": "^13.12.0",
+    "ws": "^8.17.0"
+  }
+}
