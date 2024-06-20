@@ -16,6 +16,12 @@ const MessageSchema = new mongoose.Schema({
         ref: 'User',
         required: true,
     },
+    state: {
+        type: String,
+        required: true,
+        enum: ['pending', 'sent'],
+        default: 'pending',
+    }
 },{
     timestamps: true,
 });

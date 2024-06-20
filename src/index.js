@@ -9,7 +9,7 @@ const app = express();
 const port = 8000;
 
 app.use(cors({
-  origin:true
+  origin: true
 }))
 
 app.use(json());
@@ -21,13 +21,9 @@ const server = createServer(app);
 
 // Handle WebSocket upgrade requests
 server.on('upgrade', (request, socket, head) => {
-    if (request.url === '/chat') {
-        wss.handleUpgrade(request, socket, head, (ws) => {
-            wss.emit('connection', ws, request);
-          });   
-    } else {
-        console.log("not '/chat' path");
-    }
+  wss.handleUpgrade(request, socket, head, (ws) => {
+    wss.emit('connection', ws, request);
+  });
 });
 
 server.listen(port, () => {
