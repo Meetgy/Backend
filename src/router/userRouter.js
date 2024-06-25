@@ -14,6 +14,16 @@ userRouter.post('/signup', async(req, res) => {
     }
 });
 
+userRouter.get('/users', async(req, res) => {
+    const users = await User.find({});
+
+    try {
+        res.status(200).send(users)
+    } catch (err) {
+        res.status(400).send(err)
+    }
+});
+
 export {
     userRouter
 };

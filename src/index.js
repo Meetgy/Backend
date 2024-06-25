@@ -13,7 +13,7 @@ app.use(cors({
 }))
 
 app.use(json());
-app.use('/user', userRouter);
+app.use(userRouter);
 app.use('/chat', messageRouter);
 
 // Initialize a simple HTTP server
