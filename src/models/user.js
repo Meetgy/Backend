@@ -1,4 +1,5 @@
 import mongoose, { Types, model } from "mongoose";
+import uniqueValidator from 'mongoose-unique-validator'
 
 const UserSchema = new mongoose.Schema({
     username: {
@@ -54,12 +55,14 @@ const UserSchema = new mongoose.Schema({
     timestamps: true,
 });
 
+UserSchema.plugin(uniqueValidator, { message: '{PATH} Already Taken. Try Another' });
+
 UserSchema.methods.toJSON = function () {
     const user = this;
-
+    
     const userObject = user.toObject();
-
     delete userObject.password;
+
     return userObject;
 }
 
