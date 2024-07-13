@@ -4,21 +4,21 @@ const MessageSchema = new mongoose.Schema({
     content: {
         type: String,
         trim:true,
-        required:true,
+        required: [true, 'Content is required'],
     },
     sender_id: {
         type: Types.ObjectId,
         ref: 'User',
-        required: true,
+        required: [true, 'sender_id is required'],
     },
     receiver_id: {
         type: Types.ObjectId,
         ref: 'User',
-        required: true,
+        required: [true, 'receiver_id is required'],
     },
     state: {
         type: String,
-        required: true,
+        required: [true, 'state is required'],
         enum: ['pending', 'sent'],
         default: 'pending',
     }
