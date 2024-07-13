@@ -3,24 +3,24 @@ import { User } from "../models/user.js";
 
 const userRouter = new Router();
 
-userRouter.post('/signup', async(req, res) => {
+userRouter.post('/signup', async (req, res) => {
     const user = new User(req.body);
 
     try {
         await user.save();
         res.status(200).send(user)
-    } catch (err) {
-        res.status(400).send(err)
+    } catch (error) {
+        res.status(400).json(error)
     }
 });
 
-userRouter.get('/users', async(req, res) => {
+userRouter.get('/users', async (req, res) => {
     const users = await User.find({});
 
     try {
         res.status(200).send(users)
-    } catch (err) {
-        res.status(400).send(err)
+    } catch (error) {
+        res.status(400).send(error)
     }
 });
 

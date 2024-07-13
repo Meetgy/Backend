@@ -34,7 +34,7 @@ wss.on('connection', async (ws, request) => {
         }
         console.log(pendingMsgs);
 
-        ws.on('message', async (message, isBinary) => {
+        ws.on('message', async (message) => {
 
             const { sender_id, receiver_id, content, state } = JSON.parse(message);
             try {

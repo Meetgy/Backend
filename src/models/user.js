@@ -1,11 +1,11 @@
 import mongoose, { Types, model } from "mongoose";
-import validator from "validator";
+import uniqueValidator from 'mongoose-unique-validator'
 
 const UserSchema = new mongoose.Schema({
     username: {
         type: String,
         unique: true,
-        required: true,
+        required: [true, 'Username is required'],
         trim:true,
         lowercase: true,
     },
@@ -17,22 +17,25 @@ const UserSchema = new mongoose.Schema({
     email: {
         type: String,
         lowercase: true,
-        required: true,
+        required: [true, 'Email is required'],
         unique:true,
         trim:true,
         validate: {
-            validator: (value) => validator.isEmail(value),
-            message: 'Email is invalid.'
+            validator: (value) => {
+                // Validating Email using Regex
+                return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+            },
+            message: 'Email is invalid'
         }
     },
     password: {
         type: String,
-        required: true,
+        required: [true, 'Password is required'],
         trim:true,
-        minlength: 7,
+        minlength:[8, 'Password must be at least 8 characters long'],
         validate: {
             validator: (value) => !value.toLowerCase().includes("password"),
-            message: 'Email is invalid.'
+            message: 'Password is invalid.'
         }
     },
     profile_picture: {
@@ -40,7 +43,7 @@ const UserSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        required: true,
+        required: [true, 'Status is required'],
         enum: ['offline', 'online'],
         default: 'offline',
     },
@@ -52,12 +55,14 @@ const UserSchema = new mongoose.Schema({
     timestamps: true,
 });
 
+UserSchema.plugin(uniqueValidator, { message: '{PATH} Already Taken. Try Another' });
+
 UserSchema.methods.toJSON = function () {
     const user = this;
-
+    
     const userObject = user.toObject();
-
     delete userObject.password;
+
     return userObject;
 }
 
