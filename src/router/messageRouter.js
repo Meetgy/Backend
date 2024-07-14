@@ -62,11 +62,11 @@ wss.on('connection', async (ws, request) => {
                     newMessage.state = 'sent'
                     await newMessage.save();
                     // console.log(newMessage == undefined);
-                    receiverWs.send(JSON.stringify({ event: 'messageSaved', message: newMessage }));
-                    senderWs.send(JSON.stringify({ event: 'messageSaved', message: newMessage }));
+                    receiverWs.send(JSON.stringify({ event: 'messageReceived', message: newMessage }));
+                    senderWs.send(JSON.stringify({ event: 'messageReached', message: newMessage }));
                 } else if (!receiverWs) {
                     await newMessage.save();
-                    senderWs.send(JSON.stringify({ event: 'messageSaved', message: newMessage }));
+                    senderWs.send(JSON.stringify({ event: 'messagePending', message: newMessage }));
                 }
 
                 console.log(`Message from ${sender_id} to ${receiver_id}: ${content} is ${newMessage.state}`);
