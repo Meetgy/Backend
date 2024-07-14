@@ -55,7 +55,7 @@ const UserSchema = new mongoose.Schema({
     timestamps: true,
 });
 
-UserSchema.plugin(uniqueValidator, { message: '{PATH} Already Taken. Try Another' });
+UserSchema.plugin(uniqueValidator, { message: '{PATH} is already taken. Please try another one.' });
 
 UserSchema.methods.toJSON = function () {
     const user = this;
