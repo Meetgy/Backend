@@ -35,7 +35,7 @@ const UserSchema = new mongoose.Schema({
         minlength:[8, 'Password must be at least 8 characters long'],
         validate: {
             validator: (value) => !value.toLowerCase().includes("password"),
-            message: 'Password is invalid.'
+            message: 'Password cannot contain the word "password".'
         }
     },
     profile_picture: {
