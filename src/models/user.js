@@ -35,7 +35,7 @@ const UserSchema = new mongoose.Schema({
         minlength:[8, 'Password must be at least 8 characters long'],
         validate: {
             validator: (value) => !value.toLowerCase().includes("password"),
-            message: 'Password is invalid.'
+            message: 'Password cannot contain the word "password".'
         }
     },
     profile_picture: {
@@ -55,7 +55,7 @@ const UserSchema = new mongoose.Schema({
     timestamps: true,
 });
 
-UserSchema.plugin(uniqueValidator, { message: '{PATH} Already Taken. Try Another' });
+UserSchema.plugin(uniqueValidator, { message: '{PATH} is already taken. Please try another one.' });
 
 UserSchema.methods.toJSON = function () {
     const user = this;
