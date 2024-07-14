@@ -28,12 +28,16 @@ wss.on('connection', async (ws, request) => {
                 state: "pending"
             });
             const receiverWs = clientsMap.get(pendingMsgs[0]?.receiver_id.toString())
+            const senderWs = clientsMap.get(pendingMsgs[0]?.sender_id.toString())
             if (pendingMsgs && receiverWs && receiverWs.readyState === WebSocket.OPEN) {
-                pendingMsgs.forEach(pendingMsg => {
-                    receiverWs.send(JSON.stringify({ event: 'messageSaved', message: pendingMsg }))
+                pendingMsgs.forEach(async (pendingMsg) => {
+                    pendingMsg.state = 'sent'
+                    receiverWs.send(JSON.stringify({ event: 'pendingMessageReceived', message: pendingMsg }))
+                    senderWs.send(JSON.stringify({ event: 'pendingMessageReached', message: pendingMsg }))
+                    await pendingMsg.save();
+                    console.log(pendingMsg);
                 });
             }
-            console.log(pendingMsgs);
         } catch (error) {
             console.error('Error fetching pending messages:', error);
         }
