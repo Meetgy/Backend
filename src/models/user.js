@@ -1,5 +1,6 @@
 import mongoose, { Types, model } from "mongoose";
 import uniqueValidator from 'mongoose-unique-validator'
+import jwt from "jsonwebtoken";
 
 const UserSchema = new mongoose.Schema({
     username: {
@@ -51,6 +52,12 @@ const UserSchema = new mongoose.Schema({
         type: Types.ObjectId,
         ref: 'User'
     }],
+    tokens: [{
+        token: {
+            type: String,
+            required: [true, 'please Authenticate']
+        }
+    }]
 },{
     timestamps: true,
 });
@@ -62,8 +69,19 @@ UserSchema.methods.toJSON = function () {
     
     const userObject = user.toObject();
     delete userObject.password;
+    delete userObject.tokens;
 
     return userObject;
+}
+
+UserSchema.methods.generateAuthToken = async function () {
+    const user = this;
+    const token = jwt.sign({_id: user._id.toString()}, "This is a temporary Private Key");
+
+    user.tokens = user.tokens.concat({ token });
+    await user.save();
+
+    return token;
 }
 
 const User = model('User', UserSchema);
