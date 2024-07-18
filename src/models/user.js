@@ -51,6 +51,12 @@ const UserSchema = new mongoose.Schema({
         type: Types.ObjectId,
         ref: 'User'
     }],
+    tokens: [{
+        token: {
+            type: String,
+            required: [true, 'please Authenticate']
+        }
+    }]
 },{
     timestamps: true,
 });
