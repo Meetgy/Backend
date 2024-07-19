@@ -28,6 +28,4 @@ const MessageSchema = new mongoose.Schema({
 
 const Message = model('Message', MessageSchema);
 
-export {
-    Message
-}
+export default Message;

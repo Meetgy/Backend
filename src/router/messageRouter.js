@@ -1,6 +1,6 @@
 import { Router } from "express"
 import { WebSocketServer } from "ws"
-import { Message } from "../models/message.js"
+import Message from "../models/message.js"
 
 const messageRouter = Router();
 
