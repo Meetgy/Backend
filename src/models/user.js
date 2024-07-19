@@ -86,6 +86,4 @@ UserSchema.methods.generateAuthToken = async function () {
 
 const User = model('User', UserSchema);
 
-export {
-    User
-};
+export default User;
