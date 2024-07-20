@@ -7,20 +7,20 @@ const UserSchema = new mongoose.Schema({
         type: String,
         unique: true,
         required: [true, 'Username is required'],
-        trim:true,
+        trim: true,
         lowercase: true,
     },
     name: {
         type: String,
         required: true,
-        trim:true,
+        trim: true,
     },
     email: {
         type: String,
         lowercase: true,
         required: [true, 'Email is required'],
-        unique:true,
-        trim:true,
+        unique: true,
+        trim: true,
         validate: {
             validator: (value) => {
                 // Validating Email using Regex
@@ -32,15 +32,15 @@ const UserSchema = new mongoose.Schema({
     password: {
         type: String,
         required: [true, 'Password is required'],
-        trim:true,
-        minlength:[8, 'Password must be at least 8 characters long'],
+        trim: true,
+        minlength: [8, 'Password must be at least 8 characters long'],
         validate: {
             validator: (value) => !value.toLowerCase().includes("password"),
             message: 'Password cannot contain the word "password".'
         }
     },
     profile_picture: {
-        type:Buffer
+        type: Buffer
     },
     status: {
         type: String,
@@ -58,7 +58,7 @@ const UserSchema = new mongoose.Schema({
             required: [true, 'please Authenticate']
         }
     }]
-},{
+}, {
     timestamps: true,
 });
 
@@ -66,7 +66,7 @@ UserSchema.plugin(uniqueValidator, { message: '{PATH} is already taken. Please t
 
 UserSchema.methods.toJSON = function () {
     const user = this;
-    
+
     const userObject = user.toObject();
     delete userObject.password;
     delete userObject.tokens;
@@ -76,7 +76,15 @@ UserSchema.methods.toJSON = function () {
 
 UserSchema.methods.generateAuthToken = async function () {
     const user = this;
-    const token = jwt.sign({_id: user._id.toString()}, "This is a temporary Private Key");
+
+    const token = jwt.sign(
+        {
+            username: user.username,
+            email: user.email,
+            _id: user._id.toString(),
+        },
+        "This is a temporary Private Key"
+    );
 
     user.tokens = user.tokens.concat({ token });
     await user.save();
