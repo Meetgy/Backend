@@ -76,7 +76,15 @@ UserSchema.methods.toJSON = function () {
 
 UserSchema.methods.generateAuthToken = async function () {
     const user = this;
-    const token = jwt.sign({_id: user._id.toString()}, "This is a temporary Private Key");
+
+    const token = jwt.sign(
+        {
+            username: user.username,
+            email: user.email,
+            _id: user._id.toString(),
+        },
+        "This is a temporary Private Key"
+    );
 
     user.tokens = user.tokens.concat({ token });
     await user.save();
