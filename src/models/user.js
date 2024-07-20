@@ -1,6 +1,7 @@
 import mongoose, { Types, model } from "mongoose";
 import uniqueValidator from 'mongoose-unique-validator'
 import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
 
 const UserSchema = new mongoose.Schema({
     username: {
@@ -91,6 +92,37 @@ UserSchema.methods.generateAuthToken = async function () {
 
     return token;
 }
+UserSchema.statics.findByCredentials = async (body) => {
+    const { username , email, password } = body;
+    let user;
+
+    const uniqueCredential = username ? { username } : { email }
+    if(uniqueCredential) {
+        user = await User.findOne(uniqueCredential)
+    }
+
+    if (!user) {
+        throw new Error('Please provide a valid Username or Email');
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if(!isMatch) {
+        throw new Error('Wrong Password');
+    }
+    
+    return user;
+}
+
+UserSchema.pre('save', async function (next) {
+    const user = this;
+
+    if (user.isModified('password')) {
+        user.password = await bcrypt.hash(user.password, 10);
+    }
+
+    next();
+})
 
 const User = model('User', UserSchema);
 
