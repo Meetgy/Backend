@@ -29,6 +29,18 @@ userRouter.post('/login', async (req, res) => {
     }
 });
 
+userRouter.post('/logout', auth, async (req, res) => {
+    try {
+        req.user.tokens = req.user.tokens.filter((tokenObject) => {
+            return tokenObject.token !== req.token;
+        })
+        await req.user.save();
+        res.send();
+    } catch (error) {
+        res.status(500).json(error);
+    }
+});
+
 userRouter.get('/connections', auth, async (req, res) => {
     const users = await User.find({});
 
