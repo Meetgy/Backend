@@ -10,7 +10,7 @@ const auth = async (req, res, next) => {
         }
         
         const decoded = jwt.verify(token, "This is a temporary Private Key");
-        const user = User.findOne({username: decoded.username, _id: decoded._id, 'tokens.token': token});
+        const user = await User.findOne({username: decoded.username, _id: decoded._id, 'tokens.token': token});
         if(!user) {
             throw new Error();
         }
