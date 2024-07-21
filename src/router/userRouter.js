@@ -15,7 +15,7 @@ userRouter.post('/signup', async (req, res) => {
         const token = await user.generateAuthToken();
         res.status(200).send({ user, token });
     } catch (error) {
-        res.status(400).json(error)
+        res.status(400).json(error);
     }
 });
 
@@ -25,7 +25,7 @@ userRouter.post('/login', async (req, res) => {
         const token = await user.generateAuthToken();
         res.status(200).send({ user, token });
     } catch (error) {
-        res.status(400).json(error);
+        res.status(400).json({ Message: error.message });
     }
 });
 
@@ -37,11 +37,11 @@ userRouter.post('/logout', auth, async (req, res) => {
         await req.user.save();
         res.send();
     } catch (error) {
-        res.status(500).json(error);
+        res.status(500).json({ Message: error.message });
     }
 });
 
-userRouter.post('/logoutAll', auth, async (req, res) => {
+userRouter.post('/logout_all', auth, async (req, res) => {
     try {
         const user = await User.findByCredentials(req.body);
         user.tokens = user.tokens.filter((tokenObject) => {
@@ -50,7 +50,7 @@ userRouter.post('/logoutAll', auth, async (req, res) => {
         await user.save();
         res.status(200).send({ user:req.user, token:req.token })
     } catch (error) {
-        res.status(400).json(error);
+        res.status(400).json({ Message: error.message });
     }
 });
 
@@ -60,7 +60,7 @@ userRouter.get('/connections', auth, async (req, res) => {
     try {
         res.status(200).send(users)
     } catch (error) {
-        res.status(400).send(error)
+        res.status(400).json({ Message: error.message });
     }
 });
 
