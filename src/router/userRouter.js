@@ -25,7 +25,7 @@ userRouter.post('/login', async (req, res) => {
         const token = await user.generateAuthToken();
         res.status(200).send({ user, token });
     } catch (error) {
-        res.status(400).json({ Message: error.message });
+        res.status(400).json({ message: error.message });
     }
 });
 
@@ -37,7 +37,7 @@ userRouter.post('/logout', auth, async (req, res) => {
         await req.user.save();
         res.send();
     } catch (error) {
-        res.status(500).json({ Message: error.message });
+        res.status(500).json({ message: error.message });
     }
 });
 
@@ -50,7 +50,17 @@ userRouter.post('/logout_all', auth, async (req, res) => {
         await user.save();
         res.status(200).send({ user:req.user, token:req.token })
     } catch (error) {
-        res.status(400).json({ Message: error.message });
+        res.status(400).json({ message: error.message });
+    }
+});
+
+userRouter.delete('/remove_account', auth, async (req, res) => {
+    try {
+        const user = await User.findByCredentials(req.body);
+        await User.findByIdAndDelete(user._id);
+        res.send({ message: "Account has been deleted Successfully" })
+    } catch (error) {
+        res.status(400).json({ message: error.message });
     }
 });
 
@@ -60,7 +70,7 @@ userRouter.get('/connections', auth, async (req, res) => {
     try {
         res.status(200).send(users)
     } catch (error) {
-        res.status(400).json({ Message: error.message });
+        res.status(400).json({ message: error.message });
     }
 });
 
