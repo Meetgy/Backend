@@ -18,7 +18,17 @@ userRouter.post('/signup', async (req, res) => {
     }
 });
 
-userRouter.get('/', async (req, res) => {
+userRouter.post('/login', async (req, res) => {
+    try {
+        const user = await User.findByCredentials(req.body);
+        const token = await user.generateAuthToken();
+        res.status(200).send({ user, token });
+    } catch (error) {
+        res.status(400).json(error);
+    }
+});
+
+userRouter.get('/connections', auth, async (req, res) => {
     const users = await User.find({});
 
     try {
