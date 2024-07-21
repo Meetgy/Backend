@@ -1,5 +1,6 @@
 import { Router } from "express";
 import User from "../models/user.js";
+import auth from "../middleware/auth.js";
 
 const userRouter = new Router();
 
