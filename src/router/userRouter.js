@@ -57,7 +57,7 @@ userRouter.post('/logout_all', auth, async (req, res) => {
 userRouter.delete('/remove_account', auth, async (req, res) => {
     try {
         const user = await User.findByCredentials(req.body);
-        await User.findByIdAndDelete(user._id);
+        await User.findOneAndDelete(user._id);
         res.send({ message: "Account has been deleted Successfully" })
     } catch (error) {
         res.status(400).json({ message: error.message });

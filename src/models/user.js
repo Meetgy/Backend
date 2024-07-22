@@ -2,6 +2,7 @@ import mongoose, { Types, model } from "mongoose";
 import uniqueValidator from 'mongoose-unique-validator'
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import Message from "./message.js";
 
 const UserSchema = new mongoose.Schema({
     username: {
@@ -122,6 +123,16 @@ UserSchema.pre('save', async function (next) {
     }
 
     next();
+})
+
+UserSchema.pre('findOneAndDelete', async function (next) {
+    const _id = this.getQuery()["_id"];
+    try {
+        await Message.deleteMany({ $or: [ {sender_id: _id}, {receiver_id: _id} ] });
+        next();
+    } catch (error) {
+        next(error);
+    }
 })
 
 const User = model('User', UserSchema);
