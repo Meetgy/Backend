@@ -1,11 +1,12 @@
 import { Router } from "express";
 import User from "../models/user.js";
 import auth from "../middleware/auth.js";
+import { check, validationResult } from "express-validator";
 
 const userRouter = new Router();
 
 userRouter.post('/signup', async (req, res) => {
-    if(!req.body.username.includes('@')) {
+    if (!req.body.username.includes('@')) {
         req.body.username = `@${req.body.username}`
     }
     const user = new User(req.body);
@@ -48,7 +49,7 @@ userRouter.post('/logout_all', auth, async (req, res) => {
             return tokenObject.token == req.token;
         })
         await user.save();
-        res.status(200).send({ user:req.user, token:req.token })
+        res.status(200).send({ user: req.user, token: req.token })
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
@@ -63,6 +64,44 @@ userRouter.delete('/remove_account', auth, async (req, res) => {
         res.status(400).json({ message: error.message });
     }
 });
+
+userRouter.patch('/edit', auth,
+    [
+        check('username').optional().isLength({ min: 1 }).withMessage('Username must be at least 1 characters long'),
+        check('name').optional().isLength({ min: 1 }).withMessage('Name is required')
+    ],
+    async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+        const updates = Object.keys(req.body);
+        const allowedEdits = ['username', 'name'];
+        const isValidOperation = updates.every((update) => allowedEdits.includes(update));
+
+        if (!isValidOperation) {
+            return res.status(400).json({ message: 'Invalid updates!' })
+        }
+        if (updates.includes('username')) {
+            if (!req.body.username.includes('@')) {
+                req.body.username = `@${req.body.username}`
+            }
+        }
+        try {
+            req.user.tokens = req.user.tokens.filter((tokenObject) => {
+                return tokenObject.token !== req.token;
+            })
+
+            updates.forEach((update) => req.user[update] = req.body[update])
+            await req.user.save()
+
+            const token = await req.user.generateAuthToken();
+
+            res.send({ user: req.user, token })
+        } catch (error) {
+            res.status(500).json({ message: error.message })
+        }
+    });
 
 userRouter.get('/connections', auth, async (req, res) => {
     const users = await User.find({});

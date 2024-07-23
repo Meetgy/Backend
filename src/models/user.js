@@ -11,11 +11,13 @@ const UserSchema = new mongoose.Schema({
         required: [true, 'Username is required'],
         trim: true,
         lowercase: true,
+        minlength: [2, 'Username must be at least 1 characters long'],
     },
     name: {
         type: String,
         required: true,
         trim: true,
+        minlength: [1, 'Username must be at least 1 characters long'],
     },
     email: {
         type: String,
@@ -103,7 +105,7 @@ UserSchema.statics.findByCredentials = async (body) => {
     }
 
     if (!user) {
-        throw new Error('Please provide a valid Username or Email');
+        throw new Error(`Please provide a valid ${Object.keys(uniqueCredential)[0]}`);
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
