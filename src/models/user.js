@@ -92,18 +92,9 @@ UserSchema.methods.generateAuthToken = async function () {
 
     user.tokens = user.tokens.concat({ token });
     await user.save();
-    
+
     return token;
 }
-
-UserSchema.statics.comparePassword = async (providedPassword, storedPassword) => {
-    try {
-        return await bcrypt.compare(providedPassword, storedPassword);
-    } catch (error) {
-        throw new Error('Password comparison failed');
-    }
-}
-
 UserSchema.statics.findByCredentials = async (body) => {
     const { username , email, password } = body;
     let user;
@@ -117,7 +108,7 @@ UserSchema.statics.findByCredentials = async (body) => {
         throw new Error(`Please provide a valid ${Object.keys(uniqueCredential)[0]}`);
     }
 
-    const isMatch = await User.comparePassword(password, user.password)
+    const isMatch = await bcrypt.compare(password, user.password);
 
     if(!isMatch) {
         throw new Error('Wrong Password');
