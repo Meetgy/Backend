@@ -2,6 +2,7 @@ import { Router } from "express";
 import User from "../models/user.js";
 import auth from "../middleware/auth.js";
 import { check, validationResult } from "express-validator";
+import multer from "multer";
 
 const userRouter = new Router();
 
@@ -155,11 +156,27 @@ userRouter.patch('/edit/password', auth,
             req.user.password = req.body.newPassword;
             await req.user.save()
 
-            res.send({ user: req.user , token: req.token });
+            res.send({ user: req.user, token: req.token });
         } catch (error) {
             res.status(500).json({ message: error.message })
         }
     });
+
+
+const storage = multer.memoryStorage(); // Store files in memory
+
+const upload = multer({
+    storage: storage,
+    limits: {
+        fileSize: 1000000 // 1MB file size limit
+    },
+    fileFilter(req, file, cb) {
+        if (!file.originalname.match(/\.(jpeg|png|jpg)$/)) {
+            return cb(new Error('Please upload an image'));
+        }
+        cb(null, true);
+    }
+});
 
 userRouter.get('/connections', auth, async (req, res) => {
     const users = await User.find({});
