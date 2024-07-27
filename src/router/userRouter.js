@@ -2,6 +2,7 @@ import { Router } from "express";
 import User from "../models/user.js";
 import auth from "../middleware/auth.js";
 import { check, validationResult } from "express-validator";
+import multer from "multer";
 
 const userRouter = new Router();
 
@@ -134,6 +135,48 @@ userRouter.patch('/edit/email', auth,
             res.status(500).json({ message: error.message })
         }
     });
+
+userRouter.patch('/edit/password', auth,
+    [
+        check('newPassword').isLength({ min: 8 }).withMessage('Password must be at least 8 characters long'),
+        check('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters long')
+    ]
+    , async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        try {
+            const isMatch = await User.comparePassword(req.body.password, req.user.password);
+            if (!isMatch) {
+                throw new Error('The password you entered is incorrect. Please try again.');
+            }
+
+            req.user.password = req.body.newPassword;
+            await req.user.save()
+
+            res.send({ user: req.user, token: req.token });
+        } catch (error) {
+            res.status(500).json({ message: error.message })
+        }
+    });
+
+
+const storage = multer.memoryStorage(); // Store files in memory
+
+const upload = multer({
+    storage: storage,
+    limits: {
+        fileSize: 1000000 // 1MB file size limit
+    },
+    fileFilter(req, file, cb) {
+        if (!file.originalname.match(/\.(jpeg|png|jpg)$/)) {
+            return cb(new Error('Please upload an image'));
+        }
+        cb(null, true);
+    }
+});
 
 userRouter.get('/connections', auth, async (req, res) => {
     const users = await User.find({});
