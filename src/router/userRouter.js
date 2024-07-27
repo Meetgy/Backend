@@ -107,18 +107,18 @@ userRouter.patch('/edit', auth,
 userRouter.patch('/edit/email', auth,
     [
         check('newEmail').isEmail().withMessage('New Email is invalid'),
-        check('email').isEmail().withMessage('Old Email is invalid'),
+        check('oldEmail').isEmail().withMessage('Old Email is invalid'),
         check('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters long')
     ]
     , async (req, res) => {
         const errors = validationResult(req);
-        if (!errors.isEmpty()) {
+        if(!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
         }
 
         try {
             const user = await User.findByCredentials({
-                email: req.body.email,
+                email: req.body.oldEmail,
                 password: req.body.password
             });
 
