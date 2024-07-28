@@ -178,6 +178,31 @@ const upload = multer({
     }
 });
 
+userRouter.post('/profile_picture', auth, upload.single('file'), async (req, res) => {
+    try {
+        const buffer = req.file.buffer;
+        req.user.profile_picture = buffer;
+        await req.user.save();
+
+        res.send({ message: "Upload Successful"});
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+userRouter.get('/profile_picture', auth, async (req, res) => {
+    try {
+        if(!req.user || !req.user.profile_picture) {
+            throw new Error('No profile picture found');
+        }
+
+        res.set('content-type', "image/png");
+        res.send(req.user.profile_picture);
+    } catch (error) {
+        res.status(404).json({ message: error.message });
+    }
+});
+
 userRouter.get('/connections', auth, async (req, res) => {
     const users = await User.find({});
 
