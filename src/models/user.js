@@ -46,6 +46,11 @@ const UserSchema = new mongoose.Schema({
     profile_picture: {
         type: Buffer
     },
+    profile_picture_mime: {
+        type: String,
+        trim: true,
+        lowercase: true,
+    },
     status: {
         type: String,
         required: [true, 'Status is required'],

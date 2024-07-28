@@ -182,9 +182,10 @@ userRouter.post('/profile_picture', auth, upload.single('file'), async (req, res
     try {
         const buffer = req.file.buffer;
         req.user.profile_picture = buffer;
+        req.user.profile_picture_mime = req.file.mimetype;
         await req.user.save();
 
-        res.send({ message: "Upload Successful"});
+        res.send({ message: "Upload Successful" });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -192,11 +193,11 @@ userRouter.post('/profile_picture', auth, upload.single('file'), async (req, res
 
 userRouter.get('/profile_picture', auth, async (req, res) => {
     try {
-        if(!req.user || !req.user.profile_picture) {
+        if (!req.user || !req.user.profile_picture) {
             throw new Error('No profile picture found');
         }
 
-        res.set('content-type', "image/png");
+        res.set('Content-Type', req.user.profile_picture_mime);
         res.send(req.user.profile_picture);
     } catch (error) {
         res.status(404).json({ message: error.message });
