@@ -178,6 +178,18 @@ const upload = multer({
     }
 });
 
+userRouter.post('/profile_picture', auth, upload.single('file'), async (req, res) => {
+    try {
+        const buffer = req.file.buffer;
+        req.user.profile_picture = buffer;
+        await req.user.save();
+
+        res.send({ message: "Upload Successful"});
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
 userRouter.get('/connections', auth, async (req, res) => {
     const users = await User.find({});
 
