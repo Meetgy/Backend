@@ -190,6 +190,19 @@ userRouter.post('/profile_picture', auth, upload.single('file'), async (req, res
     }
 });
 
+userRouter.get('/profile_picture', auth, async (req, res) => {
+    try {
+        if(!req.user || !req.user.profile_picture) {
+            throw new Error('No profile picture found');
+        }
+
+        res.set('content-type', "image/png");
+        res.send(req.user.profile_picture);
+    } catch (error) {
+        res.status(404).json({ message: error.message });
+    }
+});
+
 userRouter.get('/connections', auth, async (req, res) => {
     const users = await User.find({});
 
