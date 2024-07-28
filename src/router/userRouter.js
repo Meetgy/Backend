@@ -203,6 +203,16 @@ userRouter.get('/profile_picture', auth, async (req, res) => {
     }
 });
 
+userRouter.delete('/profile_picture', auth, async (req, res) => {
+    try {
+        req.user.profile_picture = undefined;
+        await req.user.save();
+        res.send({ message: "Remove Successful"});
+    } catch (error) {
+        res.status(404).json({ message: error.message });
+    }
+});
+
 userRouter.get('/connections', auth, async (req, res) => {
     const users = await User.find({});
 
