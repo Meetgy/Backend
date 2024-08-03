@@ -1,6 +1,7 @@
 import { Router } from "express"
 import { WebSocketServer } from "ws"
 import Message from "../models/message.js"
+import auth from "../middleware/auth.js";
 
 const messageRouter = Router();
 
@@ -97,8 +98,13 @@ wss.on('connection', async (ws, request) => {
     }
 });
 
-messageRouter.get('/chat', (req, res) => {
-    res.send('WebSocket endpoint');
+messageRouter.get('/all', auth, async (req, res) => {
+    try {
+        const messages = await Message.find({ $or: [ {sender_id: req.user._id}, {receiver_id: req.user._id} ] })
+        res.send(messages);
+    } catch (error) {
+        res.status(401).json({ message: error.message });
+    }
 });
 
 export {
