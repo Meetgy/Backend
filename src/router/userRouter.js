@@ -112,7 +112,7 @@ userRouter.patch('/edit/email', auth,
     ]
     , async (req, res) => {
         const errors = validationResult(req);
-        if (!errors.isEmpty()) {
+        if(!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
         }
 
@@ -208,7 +208,7 @@ userRouter.delete('/profile_picture', auth, async (req, res) => {
     try {
         req.user.profile_picture = undefined;
         await req.user.save();
-        res.send({ message: "Remove Successful" });
+        res.send({ message: "Remove Successful"});
     } catch (error) {
         res.status(404).json({ message: error.message });
     }
