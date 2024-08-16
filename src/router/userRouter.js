@@ -214,7 +214,8 @@ userRouter.delete('/profile_picture', auth, async (req, res) => {
     }
 });
 
-userRouter.get('/connections', auth, async (req, res) => {
+// Implement 'auth' middleware
+userRouter.get('/connections', async (req, res) => {
     const users = await User.find({});
 
     try {
