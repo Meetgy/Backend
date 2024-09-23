@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { Router } from "express"
 import { WebSocketServer } from "ws"
 import Message from "../models/message.js"
@@ -23,6 +24,10 @@ wss.on('connection', async (ws, request) => {
         console.log(clientsMap.size);
 
         try {
+            if (!mongoose.Types.ObjectId.isValid(ws.userId)) {
+                // Handle the case where receiver_id is invalid
+                throw new Error("Invalid receiver ID");
+            }
             // Fetch and send pending messages
             const pendingMsgs = await Message.find({
                 receiver_id: ws.userId,
