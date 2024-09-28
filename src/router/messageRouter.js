@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { Router } from "express"
 import { WebSocketServer } from "ws"
 import Message from "../models/message.js"
@@ -23,6 +24,10 @@ wss.on('connection', async (ws, request) => {
         console.log(clientsMap.size);
 
         try {
+            if (!mongoose.Types.ObjectId.isValid(ws.userId)) {
+                // Handle the case where receiver_id is invalid
+                throw new Error("Invalid receiver ID");
+            }
             // Fetch and send pending messages
             const pendingMsgs = await Message.find({
                 receiver_id: ws.userId,
@@ -102,6 +107,15 @@ messageRouter.get('/all', auth, async (req, res) => {
     try {
         const messages = await Message.find({ $or: [ {sender_id: req.user._id}, {receiver_id: req.user._id} ] })
         res.send(messages);
+    } catch (error) {
+        res.status(401).json({ message: error.message });
+    }
+});
+
+messageRouter.delete('/msg/dlt/:id', auth, async (req, res) => {
+    try {
+        await Message.findOneAndDelete(req.params.id)
+        res.send({message: "Message has been deleted Successfully"});
     } catch (error) {
         res.status(401).json({ message: error.message });
     }
