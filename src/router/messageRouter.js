@@ -105,7 +105,7 @@ wss.on('connection', async (ws, request) => {
 
 messageRouter.get('/all', auth, async (req, res) => {
     try {
-        const messages = await Message.find({ $or: [ {sender_id: req.user._id}, {receiver_id: req.user._id} ] })
+        const messages = await Message.find({ $or: [{ sender_id: req.user._id }, { receiver_id: req.user._id }] })
         res.send(messages);
     } catch (error) {
         res.status(401).json({ message: error.message });
@@ -115,7 +115,19 @@ messageRouter.get('/all', auth, async (req, res) => {
 messageRouter.delete('/msg/dlt/:id', auth, async (req, res) => {
     try {
         await Message.findOneAndDelete(req.params.id)
-        res.send({message: "Message has been deleted Successfully"});
+        res.send({ message: "Message has been deleted Successfully" });
+    } catch (error) {
+        res.status(401).json({ message: error.message });
+    }
+});
+
+messageRouter.patch('/msg/dlt_from_me/:id', auth, async (req, res) => {
+    try {
+        const msg = await Message.findOne({ _id: req.params.id })
+        msg.sender_id = undefined;
+        await msg.save();
+
+        res.send({ message: "Message has been deleted for me Successfully" });
     } catch (error) {
         res.status(401).json({ message: error.message });
     }

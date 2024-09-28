@@ -3,13 +3,13 @@ import mongoose, { Types, model } from "mongoose";
 const MessageSchema = new mongoose.Schema({
     content: {
         type: String,
-        trim:true,
+        trim: true,
         required: [true, 'Content is required'],
     },
     sender_id: {
         type: Types.ObjectId,
         ref: 'User',
-        required: [true, 'sender_id is required'],
+        // required: [true, 'sender_id is required'],
     },
     receiver_id: {
         type: Types.ObjectId,
