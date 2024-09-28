@@ -112,6 +112,15 @@ messageRouter.get('/all', auth, async (req, res) => {
     }
 });
 
+messageRouter.delete('/msg/dlt/:id', auth, async (req, res) => {
+    try {
+        await Message.findOneAndDelete(req.params.id)
+        res.send({message: "Message has been deleted Successfully"});
+    } catch (error) {
+        res.status(401).json({ message: error.message });
+    }
+});
+
 export {
     messageRouter,
     wss
