@@ -3,6 +3,7 @@ import { Router } from "express"
 import { WebSocketServer } from "ws"
 import Message from "../models/message.js"
 import auth from "../middleware/auth.js";
+import User from "../models/user.js";
 
 const messageRouter = Router();
 
@@ -19,6 +20,7 @@ wss.on('connection', async (ws, request) => {
 
     if (ws.userId) {
         clientsMap.set(ws.userId, ws);
+        await User.findByIdAndUpdate(ws.userId, { status: "online" })
 
         console.log(`User ${ws.userId} connected`)
         console.log(clientsMap.size);
@@ -31,15 +33,15 @@ wss.on('connection', async (ws, request) => {
             // Fetch and send pending messages
             const pendingMsgs = await Message.find({
                 receiver_id: ws.userId,
-                state: "pending"
+                state: "sent"
             });
             const receiverWs = clientsMap.get(pendingMsgs[0]?.receiver_id.toString())
-            const senderWs = clientsMap.get(pendingMsgs[0]?.sender_id.toString())
+            // const senderWs = clientsMap.get(pendingMsgs[0]?.sender_id.toString())
             if (pendingMsgs && receiverWs && receiverWs.readyState === WebSocket.OPEN) {
                 pendingMsgs.forEach(async (pendingMsg) => {
-                    pendingMsg.state = 'sent'
+                    pendingMsg.state = 'delivered'
                     receiverWs.send(JSON.stringify({ event: 'pendingMessageReceived', message: pendingMsg }))
-                    senderWs.send(JSON.stringify({ event: 'pendingMessageReached', message: pendingMsg }))
+                    // senderWs.send(JSON.stringify({ event: 'pendingMessageReached', message: pendingMsg }))
                     await pendingMsg.save();
                     console.log(pendingMsg);
                 });
@@ -65,7 +67,7 @@ wss.on('connection', async (ws, request) => {
                 // add Redis Queue logic ///////////////////////////////////
 
                 if (receiverWs && receiverWs.readyState === WebSocket.OPEN) {
-                    newMessage.state = 'sent'
+                    newMessage.state = 'delivered'
                     await newMessage.save();
                     // console.log(newMessage == undefined);
                     receiverWs.send(JSON.stringify({ event: 'messageReceived', message: newMessage }));
@@ -91,8 +93,9 @@ wss.on('connection', async (ws, request) => {
                 ws.send(JSON.stringify({ event: 'error', message: 'Message could not be saved. Please try again.' }));
             }
         });
-        ws.on('close', () => {
+        ws.on('close', async () => {
             console.log('Client disconnected');
+            await User.findByIdAndUpdate(ws.userId, { status: "offline" })
             clientsMap.delete(ws.userId);
             console.log(clientsMap.size);
         });
@@ -112,10 +115,31 @@ messageRouter.get('/all', auth, async (req, res) => {
     }
 });
 
-messageRouter.delete('/msg/dlt/:id', auth, async (req, res) => {
+messageRouter.patch('/msg/dlt/:id', auth, async (req, res) => {
     try {
-        await Message.findOneAndDelete(req.params.id)
+        // await Message.findOneAndDelete(req.params.id)
+        const msg = await Message.find({ _id: req.params.id });
+        msg.receiver_id = undefined;
+        if (msg.ud_contains == false) {
+            await Message.findByIdAndDelete(req.params.id);
+            res.send({ message: "Message has been deleted permanently Successfully" });
+        }
+        await msg.save();
         res.send({ message: "Message has been deleted Successfully" });
+    } catch (error) {
+        res.status(401).json({ message: error.message });
+    }
+});
+
+messageRouter.delete('/msg/empty_dlt/:id', auth, async (req, res) => {
+    try {
+        const msg = await Message.find({ _id: req.params.id });
+        if (msg.ud_contains == false) {
+            await Message.findByIdAndDelete(req.params.id);
+            res.send({ message: "Message has been deleted permanently Successfully" });
+            return;
+        }
+        res.send({ message: "No Message found" });
     } catch (error) {
         res.status(401).json({ message: error.message });
     }
@@ -125,6 +149,9 @@ messageRouter.patch('/msg/dlt_from_me/:id', auth, async (req, res) => {
     try {
         const msg = await Message.findOne({ _id: req.params.id })
         msg.sender_id = undefined;
+        if (msg.sender_id == undefined && msg.receiver_id == undefined) {
+            msg.ud_contains = false;
+        }
         await msg.save();
 
         res.send({ message: "Message has been deleted for me Successfully" });
