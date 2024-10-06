@@ -19,10 +19,15 @@ const MessageSchema = new mongoose.Schema({
     state: {
         type: String,
         required: [true, 'state is required'],
-        enum: ['pending', 'sent'],
-        default: 'pending',
+        enum: ['sent', 'delivered', 'seen'],
+        default: 'sent',
+    },
+    // ud_contains => user details contains
+    ud_contains: {
+        type: Boolean,
+        default: true,
     }
-},{
+}, {
     timestamps: true,
 });
 
